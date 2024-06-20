@@ -4,72 +4,115 @@ import pandas as pd
 
 # Sample data
 data = {
-    "Electronics": {
-        "proportion": 0.4,
-        "variations": {
-            "Smartphones": 120,
-            "Laptops": 80,
-            "Tablets": 40
+    "Smartphones": {
+        "Electronics": {
+            "errors": 15,
+            "total": 200,
+            "error_rate": 0.075
+        },
+        "Accessories": {
+            "errors": 5,
+            "total": 50,
+            "error_rate": 0.1
         }
     },
-    "Furniture": {
-        "proportion": 0.3,
-        "variations": {
-            "Chairs": 70,
-            "Tables": 30,
-            "Sofas": 20
+    "Laptops": {
+        "Electronics": {
+            "errors": 10,
+            "total": 100,
+            "error_rate": 0.1
+        },
+        "Accessories": {
+            "errors": 3,
+            "total": 30,
+            "error_rate": 0.1
         }
     },
-    "Clothing": {
-        "proportion": 0.2,
-        "variations": {
-            "Shirts": 150,
-            "Jeans": 100,
-            "Jackets": 50
+    "Chairs": {
+        "Furniture": {
+            "errors": 7,
+            "total": 80,
+            "error_rate": 0.0875
+        },
+        "Office Supplies": {
+            "errors": 2,
+            "total": 20,
+            "error_rate": 0.1
         }
     },
-    "Toys": {
-        "proportion": 0.1,
-        "variations": {
-            "Action Figures": 60,
-            "Board Games": 30,
-            "Puzzles": 10
+    "Tables": {
+        "Furniture": {
+            "errors": 5,
+            "total": 60,
+            "error_rate": 0.0833
+        },
+        "Office Supplies": {
+            "errors": 1,
+            "total": 15,
+            "error_rate": 0.0667
+        }
+    },
+    "Shirts": {
+        "Clothing": {
+            "errors": 20,
+            "total": 150,
+            "error_rate": 0.1333
+        },
+        "Casual": {
+            "errors": 6,
+            "total": 50,
+            "error_rate": 0.12
+        }
+    },
+    "Jeans": {
+        "Clothing": {
+            "errors": 12,
+            "total": 100,
+            "error_rate": 0.12
+        },
+        "Casual": {
+            "errors": 4,
+            "total": 40,
+            "error_rate": 0.1
         }
     }
 }
 
-# Prepare data for pie chart
-labels = list(data.keys())
-proportions = [data[product_type]["proportion"] for product_type in data]
-
-# Create pie chart
-fig_pie = go.Figure(data=[go.Pie(labels=labels, values=proportions, hole=.3)])
-fig_pie.update_layout(
-    title_text="Proportion of Each Product Type",
-    paper_bgcolor='black',
-    plot_bgcolor='black',
-    font=dict(color='white')
-)
-fig_pie.show()
-
-# Prepare data for bar chart
-variations_data = []
-for product_type, product_info in data.items():
-    for variation, count in product_info["variations"].items():
-        variations_data.append({
+# Prepare data for bar chart and scatter plot
+errors_data = []
+error_rate_data = []
+for variation, product_types in data.items():
+    for product_type, metrics in product_types.items():
+        errors_data.append({
+            "Product Variation": variation,
             "Product Type": product_type,
-            "Variation": variation,
-            "Count": count
+            "Errors": metrics["errors"]
+        })
+        error_rate_data.append({
+            "Product Variation": variation,
+            "Product Type": product_type,
+            "Error Rate": metrics["error_rate"]
         })
 
-df_variations = pd.DataFrame(variations_data)
+df_errors = pd.DataFrame(errors_data)
+df_error_rate = pd.DataFrame(error_rate_data)
 
-# Create bar chart
-fig_bar = px.bar(df_variations, x="Product Type", y="Count", color="Variation", barmode="group")
-fig_bar.update_layout(
-    title_text="Product Variations Count by Product Type",
+# Create bar chart for errors
+fig_errors = px.bar(df_errors, x="Product Variation", y="Errors", color="Product Type", barmode="group")
+fig_errors.update_layout(
+    title_text="Number of Errors by Product Variation and Product Type",
     paper_bgcolor='black',
     plot_bgcolor='black',
     font=dict(color='white')
 )
-fig_bar.show()
+fig_errors.show()
+
+# Create scatter plot for error rate
+fig_error_rate = px.scatter(df_error_rate, x="Product Variation", y="Error Rate", color="Product Type", size="Error Rate")
+fig_error_rate.update_layout(
+    title_text="Error Rate by Product Variation and Product Type",
+    paper_bgcolor='black',
+    plot_bgcolor='black',
+    font=dict(color='white')
+)
+fig_error_rate.show()
