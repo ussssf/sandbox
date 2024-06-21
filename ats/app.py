@@ -8,31 +8,54 @@ data = [
         "runids": ["101", "102", "103"]
     },
     {
-        "Combination": ["ProductB", "Variation2"],
+        "Combination": ["ProductA", "Variation2"],
         "runids": ["104", "105", "106"]
     },
     {
-        "Combination": ["ProductC", "Variation3"],
+        "Combination": ["ProductB", "Variation1"],
         "runids": ["107", "108", "109"]
+    },
+    {
+        "Combination": ["ProductB", "Variation3"],
+        "runids": ["110", "111", "112"]
     }
 ]
 
-# Convert data to a DataFrame
-df = pd.DataFrame(data)
-df['Combination'] = df['Combination'].apply(lambda x: ' - '.join(x))
-df['runids'] = df['runids'].apply(lambda x: ', '.join(x))
+# Transform data into a hierarchical format
+grouped_data = {}
+for entry in data:
+    product, variation = entry["Combination"]
+    runids = ', '.join(entry["runids"])
+    if product not in grouped_data:
+        grouped_data[product] = []
+    grouped_data[product].append((variation, runids))
 
-# Create table using Plotly with enhanced styling
+# Prepare the table rows
+table_rows = []
+for product, variations in grouped_data.items():
+    product_row_span = len(variations)
+    for i, (variation, runids) in enumerate(variations):
+        if i == 0:
+            table_rows.append([product, variation, runids])
+        else:
+            table_rows.append(["", variation, runids])
+
+# Create a DataFrame
+df = pd.DataFrame(table_rows, columns=["Product", "Variation", "Run IDs"])
+
+# Create the table with Plotly
 fig = go.Figure(data=[go.Table(
+    columnorder=[1, 2, 3],
+    columnwidth=[80, 80, 200],
     header=dict(
-        values=list(df.columns),
+        values=["Product", "Variation", "Run IDs"],
         fill_color='#1f77b4',
         align='left',
         font=dict(color='white', size=12),
         line_color='darkslategray'
     ),
     cells=dict(
-        values=[df.Combination, df.runids],
+        values=[df.Product, df.Variation, df['Run IDs']],
         fill_color=['#f2f2f2', '#fafafa'],
         align='left',
         font=dict(color='darkslategray', size=11),
