@@ -1,6 +1,6 @@
 import pandas as pd
 import ipywidgets as widgets
-from IPython.display import display
+from IPython.display import display, clear_output
 import matplotlib.pyplot as plt
 
 # Sample data
@@ -39,6 +39,8 @@ def plot_counts(id_):
 
 # Function to search and plot
 def search_and_plot(change):
+    clear_output(wait=True)
+    display(search_input)
     search_value = change['new']
     if search_value:
         filtered_df = df[df['ID'].str.contains(search_value)]
