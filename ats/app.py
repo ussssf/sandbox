@@ -1,75 +1,55 @@
 import pandas as pd
-import plotly.graph_objects as go
+import ipywidgets as widgets
+from IPython.display import display
+import matplotlib.pyplot as plt
 
-# Example data
-data = [
-    {
-        "Combination": ["ProductA", "Variation1"],
-        "runids": ["101", "102", "103"]
-    },
-    {
-        "Combination": ["ProductA", "Variation2"],
-        "runids": ["104", "105", "106"]
-    },
-    {
-        "Combination": ["ProductB", "Variation1"],
-        "runids": ["107", "108", "109"]
-    },
-    {
-        "Combination": ["ProductB", "Variation3"],
-        "runids": ["110", "111", "112"]
-    }
-]
+# Sample data
+data = {
+    "id1": {"name1": 10, "name2": 15, "name3": 20},
+    "id2": {"name1": 5, "name2": 25, "name3": 30},
+    "id3": {"name1": 8, "name2": 18, "name3": 28}
+}
 
-# Transform data into a hierarchical format
-grouped_data = {}
-for entry in data:
-    product, variation = entry["Combination"]
-    runids = ', '.join(entry["runids"])
-    if product not in grouped_data:
-        grouped_data[product] = []
-    grouped_data[product].append((variation, runids))
+# Convert dictionary to DataFrame
+def dict_to_dataframe(data):
+    rows = []
+    for id_, values in data.items():
+        for name, count in values.items():
+            rows.append({"ID": id_, "Name": name, "Count": count})
+    return pd.DataFrame(rows)
 
-# Prepare the table rows
-table_rows = []
-for product, variations in grouped_data.items():
-    product_row_span = len(variations)
-    for i, (variation, runids) in enumerate(variations):
-        if i == 0:
-            table_rows.append([product, variation, runids])
-        else:
-            table_rows.append(["", variation, runids])
+df = dict_to_dataframe(data)
 
-# Create a DataFrame
-df = pd.DataFrame(table_rows, columns=["Product", "Variation", "Run IDs"])
+# Create search input
+search_input = widgets.Text(placeholder='Enter ID to search')
 
-# Create the table with Plotly
-fig = go.Figure(data=[go.Table(
-    columnorder=[1, 2, 3],
-    columnwidth=[80, 80, 200],
-    header=dict(
-        values=["Product", "Variation", "Run IDs"],
-        fill_color='#1f77b4',
-        align='left',
-        font=dict(color='white', size=12),
-        line_color='darkslategray'
-    ),
-    cells=dict(
-        values=[df.Product, df.Variation, df['Run IDs']],
-        fill_color=['#f2f2f2', '#fafafa'],
-        align='left',
-        font=dict(color='darkslategray', size=11),
-        line_color='darkslategray',
-        height=30
-    )
-)])
+# Function to plot counts
+def plot_counts(id_):
+    if id_ in data:
+        names = list(data[id_].keys())
+        counts = list(data[id_].values())
+        plt.figure(figsize=(10, 6))
+        plt.bar(names, counts, color='skyblue')
+        plt.xlabel('Names')
+        plt.ylabel('Counts')
+        plt.title(f'Counts for {id_}')
+        plt.show()
+    else:
+        print(f"No data available for ID: {id_}")
 
-# Update layout for better appearance
-fig.update_layout(
-    title='Product Variations and Run IDs',
-    title_x=0.5,
-    margin=dict(l=0, r=0, t=40, b=0)
-)
+# Function to search and plot
+def search_and_plot(change):
+    search_value = change['new']
+    if search_value:
+        filtered_df = df[df['ID'].str.contains(search_value)]
+        display(filtered_df)
+        plot_counts(search_value)
+    else:
+        display(df)
 
-# Show the table
-fig.show()
+search_input.observe(search_and_plot, names='value')
+display(search_input)
+
+# Display the initial table and plot
+display(df)
+plot_counts('id1')
