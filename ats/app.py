@@ -1,47 +1,63 @@
 import pandas as pd
 import plotly.graph_objects as go
 
-# Example data with 'null' values
+# Example data
 data = [
     {
         "Combination": ["ProductA", "Variation1"],
         "runids": ["101", "102", "103"]
     },
     {
-        "Combination": ["ProductB", None],
+        "Combination": ["ProductA", "Variation2"],
         "runids": ["104", "105", "106"]
     },
     {
-        "Combination": [None, "Variation3"],
+        "Combination": ["ProductB", "Variation1"],
         "runids": ["107", "108", "109"]
     },
     {
-        "Combination": [None, None],
-        "runids": ["110", "111"]
+        "Combination": ["ProductB", "Variation3"],
+        "runids": ["110", "111", "112"]
     }
 ]
 
-# Replace None with 'null' to mimic the data structure mentioned
+# Transform data into a hierarchical format
+rows = []
 for entry in data:
-    entry["Combination"] = [i if i is not None else 'null' for i in entry["Combination"]]
+    product, variation = entry["Combination"]
+    runids = ', '.join(entry["runids"])
+    rows.append([product, variation, runids])
 
-# Convert data to a DataFrame
-df = pd.DataFrame(data)
+# Create a DataFrame
+df = pd.DataFrame(rows, columns=["Product", "Variation", "Run IDs"])
 
-# Replace 'null' values with empty strings
-df['Combination'] = df['Combination'].apply(lambda x: [i if i != 'null' else '' for i in x])
-df['Combination'] = df['Combination'].apply(lambda x: ' - '.join(x))
-df['runids'] = df['runids'].apply(lambda x: ', '.join(x))
-
-# Create table using Plotly
+# Create the table with Plotly
 fig = go.Figure(data=[go.Table(
-    header=dict(values=list(df.columns),
-                fill_color='paleturquoise',
-                align='left'),
-    cells=dict(values=[df.Combination, df.runids],
-               fill_color='lavender',
-               align='left'))
-])
+    columnorder=[1, 2, 3],
+    columnwidth=[80, 80, 200],
+    header=dict(
+        values=["Product", "Variation", "Run IDs"],
+        fill_color='#1f77b4',
+        align='left',
+        font=dict(color='white', size=12),
+        line_color='darkslategray'
+    ),
+    cells=dict(
+        values=[df.Product, df.Variation, df['Run IDs']],
+        fill_color=['#f2f2f2', '#fafafa'],
+        align='left',
+        font=dict(color='darkslategray', size=11),
+        line_color='darkslategray',
+        height=30
+    )
+)])
+
+# Update layout for better appearance
+fig.update_layout(
+    title='Product Variations and Run IDs',
+    title_x=0.5,
+    margin=dict(l=0, r=0, t=40, b=0)
+)
 
 # Show the table
 fig.show()
