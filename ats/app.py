@@ -8,42 +8,31 @@ data = [
         "runids": ["101", "102", "103"]
     },
     {
-        "Combination": ["ProductA", "Variation2"],
+        "Combination": ["ProductB", "Variation2"],
         "runids": ["104", "105", "106"]
     },
     {
-        "Combination": ["ProductB", "Variation1"],
+        "Combination": ["ProductC", "Variation3"],
         "runids": ["107", "108", "109"]
-    },
-    {
-        "Combination": ["ProductB", "Variation3"],
-        "runids": ["110", "111", "112"]
     }
 ]
 
-# Transform data into a hierarchical format
-rows = []
-for entry in data:
-    product, variation = entry["Combination"]
-    runids = ', '.join(entry["runids"])
-    rows.append([product, variation, runids])
+# Convert data to a DataFrame
+df = pd.DataFrame(data)
+df['Combination'] = df['Combination'].apply(lambda x: ' - '.join(x))
+df['runids'] = df['runids'].apply(lambda x: ', '.join(x))
 
-# Create a DataFrame
-df = pd.DataFrame(rows, columns=["Product", "Variation", "Run IDs"])
-
-# Create the table with Plotly
+# Create table using Plotly with enhanced styling
 fig = go.Figure(data=[go.Table(
-    columnorder=[1, 2, 3],
-    columnwidth=[80, 80, 200],
     header=dict(
-        values=["Product", "Variation", "Run IDs"],
+        values=list(df.columns),
         fill_color='#1f77b4',
         align='left',
         font=dict(color='white', size=12),
         line_color='darkslategray'
     ),
     cells=dict(
-        values=[df.Product, df.Variation, df['Run IDs']],
+        values=[df.Combination, df.runids],
         fill_color=['#f2f2f2', '#fafafa'],
         align='left',
         font=dict(color='darkslategray', size=11),
