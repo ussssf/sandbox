@@ -73,3 +73,4 @@ fig.update_layout(
 
 # Show the table
 fig.show()
+
