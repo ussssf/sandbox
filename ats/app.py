@@ -1,7 +1,7 @@
 import pandas as pd
 import plotly.graph_objects as go
 
-# Example data with null values
+# Example data with 'null' values
 data = [
     {
         "Combination": ["ProductA", "Variation1"],
@@ -21,11 +21,15 @@ data = [
     }
 ]
 
+# Replace None with 'null' to mimic the data structure mentioned
+for entry in data:
+    entry["Combination"] = [i if i is not None else 'null' for i in entry["Combination"]]
+
 # Convert data to a DataFrame
 df = pd.DataFrame(data)
 
-# Replace None values with empty strings
-df['Combination'] = df['Combination'].apply(lambda x: [i if i is not None else '' for i in x])
+# Replace 'null' values with empty strings
+df['Combination'] = df['Combination'].apply(lambda x: [i if i != 'null' else '' for i in x])
 df['Combination'] = df['Combination'].apply(lambda x: ' - '.join(x))
 df['runids'] = df['runids'].apply(lambda x: ', '.join(x))
 
